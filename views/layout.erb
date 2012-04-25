@@ -1,28 +1,29 @@
 <!DOCTYPE html>
 
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
-<head>
-	<meta http-equiv='content-type' content='text/html;charset=utf8' />
-	<title><%= @title +' | Day at the Cinema' %></title>
-  	<link href="/reset.css" rel="stylesheet" type="text/css" />
-  	<link href="/style.css" rel="stylesheet" type="text/css" />
-</head>
+	<head>
+		<meta http-equiv='content-type' content='text/html;charset=utf8' />
+		<title><%= @title +' | Day at the Cinema' %></title>
+		<link href="/reset.css" rel="stylesheet" type="text/css" />
+		<link href="/style.css" rel="stylesheet" type="text/css" />
+	</head>
 
-<body>
-  <header>
-  	<hgroup>
-  		<h1><a href="/">Day at the Cinema</a></h1>
-  		<h2>Plan your day at the cinema the easy way!</h2>
-  	</hgroup>
-  </header>
-  
-  <div id="main">
-	  <% if flash[:notice] %>
-		  	<p class="notice"><%= flash[:notice] %>
-		<% end %>
-		<% if flash[:error] %>
+	<body>
+		<header>
+			<hgroup>
+				<h1><a href="/">Day at the Cinema</a></h1>
+				<h2>Plan your day at the cinema the easy way!</h2>
+			</hgroup>
+		</header>
+
+		<div id="main">
+			<% if flash[:notice] %>
+				<p class="notice"><%= flash[:notice] %>
+			<% end %>
+			<% if flash[:error] %>
 				<p class="error"><%= flash[:error] %>
-		<% end %>
-    	<%= yield %>
-  </div>
-</body>
+			<% end %>
+
+			<%= yield %>
+		</div>
+	</body>

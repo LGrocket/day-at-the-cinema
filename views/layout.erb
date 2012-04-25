@@ -18,11 +18,11 @@
 
 		<div id="main">
 			<% if flash[:notice] %>
-				<p class="notice"><%= flash[:notice] %>
-			<% end %>
+				<p class="notice"><%= flash[:notice] %> <% end %>
 			<% if flash[:error] %>
-				<p class="error"><%= flash[:error] %>
-			<% end %>
+				<p class="error"><%= flash[:error] %> <% end %>
+			<% if flash[:success] %>
+				<p class="error"><%= flash[:success] %> <% end %>
 
 			<%= yield %>
 		</div>

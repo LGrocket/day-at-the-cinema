@@ -1,4 +1,5 @@
 require 'bundler'
+require 'pp'
 
 class DayAtTheCinema < Sinatra::Base
 	enable :sessions
@@ -11,16 +12,19 @@ class DayAtTheCinema < Sinatra::Base
 		@title="Welcome"
 		if params[:zip]
 			session[:zip] = params[:zip]
-			"You entered a zip of '#{session[:zip]}'"
-			redirect '/movies'
-		else
-			erb :index
+			flash[:notice] = "Notice here"
+			redirect '/'
+			#redirect '/', :notice => "You entered a zip of '#{session[:zip]}'"
+			#redirect '/movies'
 		end
+		erb :index
 	end
 
 	get '/movies' do
 		@movies = Hash.new
-		GoogleShowtimes.for(session[:zip])[1].each do |movie|
+		gs = GoogleShowtimes.for '#{session[:zip]}'
+		gs = gs[1]
+		gs.each do |movie|
 			title = movie[:film][:name]
 			# Add 1 to count if we've seen this movie title before
 			if @movies.has_key? title 
@@ -55,7 +59,9 @@ class DayAtTheCinema < Sinatra::Base
 					movie["actors"].push m.cast[i]["name"]
 				}
 			end
-
+			#pp @movies
+			"we did it! Caveman debugging 1"
+		else
 			flash[:error] = "No movies found from Google Showtimes."
 		end
 	end

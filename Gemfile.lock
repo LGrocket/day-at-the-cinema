@@ -1,6 +1,7 @@
 GEM
   remote: http://rubygems.org/
   specs:
+    awesome_print (1.0.2)
     badfruit (1.1.2)
       httparty
       json
@@ -36,6 +37,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  awesome_print
   badfruit
   google_showtimes
   sinatra

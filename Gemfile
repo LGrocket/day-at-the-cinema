@@ -6,3 +6,4 @@ gem 'sinatra-redirect-with-flash', :require => "sinatra/redirect_with_flash"
 gem 'badfruit'
 gem 'google_showtimes'
 gem 'thin'
+gem "awesome_print"

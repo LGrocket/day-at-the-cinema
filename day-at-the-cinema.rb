@@ -5,8 +5,10 @@ class DayAtTheCinema < Sinatra::Base
 	set :session_secret, "My session secret"
 	register Sinatra::Flash
 
+	#Constants
 	ROTTEN_TOMATOES_API_KEY = "7gxs93ehrqkjb7mpwwr8fxvq"
 	LEAD_ACTORS = 2
+	REQUIRED_POP = 5
 
 	get '/' do
 		@title="Welcome"
@@ -19,50 +21,57 @@ class DayAtTheCinema < Sinatra::Base
 
 	get '/movies' do
 		@movies = Hash.new
-		gs = GoogleShowtimes.for session[:zip]
+		# Use local file for testing purposes
+		gs = Marshal.load(File.new("google_showtimes.txt").read)
+		#gs = GoogleShowtimes.for session[:zip]
 		gs = gs[1]
 		gs.each do |movie|
-			title = movie[:film][:name]
-			# Add 1 to count if we've seen this movie title before
+			if movie == nil
+				next
+			end
+			title = movie[:film][:name] 
 			if @movies.has_key? title 
 				@movies[title] += 1
 			else
 				# Add movie names as keys to @movies if they're unique and set them equal to 1
-				@movies[title] = nil 
 				@movies[title] = 1
 			end
 		end
-		# remove movies that only appeared once, they're not popular enough
+		# remove movies that only appeared REQUIRED_POP, they're not popular enough
 		@movies.delete_if do |key, value|
-			value < 5	
+			value < REQUIRED_POP	
 		end
 		# remove all values, there must be a better way to do this
 		titles_list = @movies.keys
 		@movies.clear
 		# add api data from Rotten Tomatoes to appropriate @moives[title]
-		bf = BadFruit.new "ROTTEN_TOMATOES_API_KEY"
+		bf = BadFruit.new ROTTEN_TOMATOES_API_KEY
 		if @movies
 			titles_list.each do |title|
-				#Why doesn't the title return a string?
-				foo = title
-				m = bf.movies.search_by_name(foo)[0]
-				@movies[title] = {
-					"poster" => m.posters.detailed, 
-					"runtime" => m.runtime,
-					"rating" => m.mpaa_rating,
-					"director" => m.directors,
-					"actors" => Array.new,
-					"choosen" => false,
-					"must" => false
-					}
-					# store LEAD_ACTORS lead actors
-					LEAD_ACTORS.times { |i|
-						@movie[title]["actors"].push m.cast[i]["name"]
-					}
+				if title.nil?
+					binding.pry
+				end
+				m = bf.movies.search_by_name(title)[0]
+				@movies[title] = Hash.new
+				set_if_not_nil @movies[title], "poster", m.posters.detailed
+				set_if_not_nil @movies[title], "runtime", m.runtime
+				set_if_not_nil @movies[title], "rating", m.mpaa_rating
+				set_if_not_nil @movies[title], "director", m.directors
+				set_if_not_nil @movies[title], "actors", Array.new
+				@movies[title]["choosen"] = false
+				@movies[title]["must"] = false
+				# store LEAD_ACTORS lead actors
+				LEAD_ACTORS.times { |i|
+					@movies[title]["actors"].push m.cast[i]["name"] unless m.cast[i]["name"].nil?
+				}
 			end
 		else
 			flash[:error] = "No movies found from Google Showtimes."
 		end
 		erb :movies
+	end
+
+	def set_if_not_nil (hash, key, value)
+		hash[key] = value unless value.nil?
 	end
 end

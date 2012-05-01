@@ -2,3 +2,5 @@ day-at-the-cinema
 =================
 
 Sinatra based movie scheduler.
+
+Day at the Cinema is a sinatra baseed web app that helps the user schedule multiple movies with the shortest amount of waiting time between showings at the theater. (Potential uses include "movie-hopping" but /shh/ you didn't hear it from me.) The user inputs their zip code, the app utilizes the Google Showtimes gem that scrapes showtimes from Google Movies (there are seemingly no free movie showtimes APIs), and this data is presented along with a Rotten Tomatoes rating, using the gem BadFruit that handles the API calls. The users chooses which movies are "must" movies and which are "might" movies. The app them uses a graph data structure with weighted edges to heuristically attempt to find the best schedule of showtimes for the user. (It's similar to the traveling salesmen problem, but with time instead of distance and showings instead of towns.) Where "best" is judged by having all must movies, and the shortest waiting time between movies.

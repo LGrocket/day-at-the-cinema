@@ -26,10 +26,11 @@ class DayAtTheCinema < Sinatra::Base
 		#gs = GoogleShowtimes.for session[:zip]
 		gs = gs[1]
 		gs.each do |movie|
-			if movie == nil
+			if movie.nil?
+				#binding.pry
 				next
 			end
-			title = movie[:film][:name] 
+			title = movie[:film][:name] unless movie.nil?
 			if @movies.has_key? title 
 				@movies[title] += 1
 			else
@@ -41,6 +42,9 @@ class DayAtTheCinema < Sinatra::Base
 		@movies.delete_if do |key, value|
 			value < REQUIRED_POP	
 		end
+		# sort @movies by popularity so more popular movies appear at top of list
+		# in movies.erb
+		@movies.sort_by {|k, v| v}
 		# remove all values, there must be a better way to do this
 		titles_list = @movies.keys
 		@movies.clear
@@ -49,25 +53,30 @@ class DayAtTheCinema < Sinatra::Base
 		if @movies
 			titles_list.each do |title|
 				if title.nil?
-					binding.pry
+					next
+				else
+					m = bf.movies.search_by_name(title)[0] unless title.nil?
 				end
-				m = bf.movies.search_by_name(title)[0]
 				@movies[title] = Hash.new
-				set_if_not_nil @movies[title], "poster", m.posters.detailed
+				set_if_not_nil @movies[title], "poster", m.posters.profile
+				set_if_not_nil @movies[title], "full_poster", m.posters.original
 				set_if_not_nil @movies[title], "runtime", m.runtime
 				set_if_not_nil @movies[title], "rating", m.mpaa_rating
+				set_if_not_nil @movies[title], "score", m.scores.critics_score
 				set_if_not_nil @movies[title], "director", m.directors
 				set_if_not_nil @movies[title], "actors", Array.new
-				@movies[title]["choosen"] = false
+				@movies[title]["might"] = false
 				@movies[title]["must"] = false
 				# store LEAD_ACTORS lead actors
 				LEAD_ACTORS.times { |i|
 					@movies[title]["actors"].push m.cast[i]["name"] unless m.cast[i]["name"].nil?
 				}
+				sleep 0.1
 			end
 		else
 			flash[:error] = "No movies found from Google Showtimes."
 		end
+		session[:movies] = @movies
 		erb :movies
 	end
 

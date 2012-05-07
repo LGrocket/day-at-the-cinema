@@ -26,11 +26,11 @@ class DayAtTheCinema < Sinatra::Base
 		#gs = GoogleShowtimes.for session[:zip]
 		gs = gs[1]
 		gs.each do |movie|
-			if movie.nil?
-				#binding.pry
+			begin 
+				title = movie[:film][:name]
+			rescue
 				next
 			end
-			title = movie[:film][:name] unless movie.nil?
 			if @movies.has_key? title 
 				@movies[title] += 1
 			else
@@ -44,43 +44,45 @@ class DayAtTheCinema < Sinatra::Base
 		end
 		# sort @movies by popularity so more popular movies appear at top of list
 		# in movies.erb
-		@movies.sort_by {|k, v| v}
-		# remove all values, there must be a better way to do this
+		@movies.sort_by {|key, value| value}
 		titles_list = @movies.keys
 		@movies.clear
 		# add api data from Rotten Tomatoes to appropriate @moives[title]
 		bf = BadFruit.new ROTTEN_TOMATOES_API_KEY
-		if @movies
-			titles_list.each do |title|
-				if title.nil?
+		titles_list.each do |title|
+			begin
+				m = bf.movies.search_by_name(title)[0]
+			rescue
+				next
+			end
+			@movies[title] = Hash.new
+			[
+				["poster", m.posters.profile],
+				["full_poster", m.posters.original],
+				["runtime", m.runtime],
+				["rating", m.mpaa_rating],
+				["score", m.scores.critics_score],
+				#["director", m.directors],
+				["actors", Array.new],
+				["might", false],
+				["must", false]
+			].each do |n|
+				begin
+					@movies[title][n[0]] = n[1]
+				rescue
 					next
-				else
-					m = bf.movies.search_by_name(title)[0] unless title.nil?
 				end
-				@movies[title] = Hash.new
-				set_if_not_nil @movies[title], "poster", m.posters.profile
-				set_if_not_nil @movies[title], "full_poster", m.posters.original
-				set_if_not_nil @movies[title], "runtime", m.runtime
-				set_if_not_nil @movies[title], "rating", m.mpaa_rating
-				set_if_not_nil @movies[title], "score", m.scores.critics_score
-				set_if_not_nil @movies[title], "director", m.directors
-				set_if_not_nil @movies[title], "actors", Array.new
-				@movies[title]["might"] = false
-				@movies[title]["must"] = false
-				# store LEAD_ACTORS lead actors
-				LEAD_ACTORS.times { |i|
-					@movies[title]["actors"].push m.cast[i]["name"] unless m.cast[i]["name"].nil?
-				}
 				sleep 0.1
 			end
-		else
-			flash[:error] = "No movies found from Google Showtimes."
+			LEAD_ACTORS.times { |i|
+				begin
+					@movies[title]["actors"].push m.cast[i]["name"]
+				rescue
+					next
+				end
+				sleep 0.1
+			}
 		end
-		session[:movies] = @movies
 		erb :movies
-	end
-
-	def set_if_not_nil (hash, key, value)
-		hash[key] = value unless value.nil?
 	end
 end

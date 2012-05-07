@@ -9,8 +9,9 @@
 			<p class="poster"><a href=<%= movie[1]["full_poster"] %>><img src=<%= movie[1]["poster"] %> alt="" /></a></p>
 			<p class="runtime"><%= movie[1]["runtime"] %> min</p> 
 			<p class="rating"><%= movie[1]["rating"]%></p>
-			<p class="director"><%= movie[1]["director"]%></p>
-			<p class="actors">
+			<p class="score">Critic Score: <%= movie[1]["score"]%></p>
+			<!--<p class="director">Directed by: <%= movie[1]["director"]%></p>-->
+			<p class="actors">Staring:
 				<% movie[1]["actors"].each do |actor| %>
 					<p class="single_actor"><%= actor %></p>
 				<% end %>
@@ -19,8 +20,8 @@
 				Not interested <input type="radio" value="no" checked="true" name="<%= movie[0] %>" />
 				Might <input type="radio" value="might" name="<%= movie[0] %>" />
 				Must <input type="radio" value="must" name="<%= movie[0] %>" />
-				<input type="submit" value="submit" />
-			</form>
 		<% end %>
+		<br /><input type="submit" value="submit" />
+			</form>
 	</section>
 </section>
